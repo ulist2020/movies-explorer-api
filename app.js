@@ -12,7 +12,7 @@ app.use(cors());
 
 const { createUser, login } = require('./controllers/users');
 const usersRoutes = require('./routes/users');
-const cardsRoutes = require('./routes/cards');
+const moviesRoutes = require('./routes/movie');
 const auth = require('./middlewares/auth');
 const { validateSign, validateUserRegister } = require('./middlewares/validation');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
@@ -47,7 +47,7 @@ app.post('/signup', validateUserRegister, createUser);
 app.post('/signin', validateSign, login);
 
 app.use('/', auth, usersRoutes);
-app.use('/', auth, cardsRoutes);
+app.use('/', auth, moviesRoutes);
 
 app.use('/', () => {
   throw new NotFoundError('Запрашиваемый ресурс не найден');

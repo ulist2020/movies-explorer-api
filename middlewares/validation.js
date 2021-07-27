@@ -6,35 +6,43 @@ const url = /^(https?:\/\/)?(www\.)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\
 const validateUser = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    about: Joi.string().required().min(2).max(30),
+    email: Joi.string().required().email(),
   }),
 });
 
-const validateAvatar = celebrate({
+const validateMovie = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().required().uri().custom((value, helper) => {
+    country: Joi.string().required(),
+    director: Joi.string().required(),
+    duration: Joi.number().required(),
+    year: Joi.string().required(),
+    description: Joi.string().required(),
+    image: Joi.string().uri().custom((value, helper) => {
       if (!value.match(url)) {
         return helper.message('Invalid value');
       }
       return value;
     }),
-  }),
-});
-
-const validateCard = celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().required().min(2).max(30),
-    link: Joi.string().uri().custom((value, helper) => {
+    trailer: Joi.string().uri().custom((value, helper) => {
       if (!value.match(url)) {
         return helper.message('Invalid value');
       }
       return value;
     }),
+    thumbnail: Joi.string().uri().custom((value, helper) => {
+      if (!value.match(url)) {
+        return helper.message('Invalid value');
+      }
+      return value;
+    }),
+    movieId: Joi.number().required(),
+    nameRU: Joi.string().required(),
+    nameEN: Joi.string().required(),
   }),
 });
-const validateIdCard = celebrate({
+const validateIdMovie = celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string().required().hex().length(24),
+    movieId: Joi.string().required().hex().length(24),
   }),
 });
 const validateId = celebrate({
@@ -51,13 +59,6 @@ const validateSign = celebrate({
 const validateUserRegister = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
-    avatar: Joi.string().uri().custom((value, helper) => {
-      if (!value.match(url)) {
-        return helper.message('Invalid value');
-      }
-      return value;
-    }),
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
   }),
@@ -65,9 +66,8 @@ const validateUserRegister = celebrate({
 
 module.exports = {
   validateUser,
-  validateAvatar,
-  validateCard,
-  validateIdCard,
+  validateMovie,
+  validateIdMovie,
   validateId,
   validateSign,
   validateUserRegister,
