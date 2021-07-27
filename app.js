@@ -4,7 +4,7 @@ const { errors } = require('celebrate');
 require('dotenv').config();
 const cors = require('cors');
 
-const { PORT = 5000 } = process.env;
+const { PORT = 3000 } = process.env;
 const bodyParser = require('body-parser');
 
 const app = express();
