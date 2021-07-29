@@ -61,10 +61,7 @@ module.exports.createUser = (req, res, next) => {
       password: hash,
       name,
     }))
-    .then((user) => {
-      // eslint-disable-next-line no-shadow
-      User.findById(user._id).then((user) => res.status(200).send(user));
-    })
+    .then((user) => res.send({ name: user.name, email: user.email }))
     .catch(next);
 };
 
