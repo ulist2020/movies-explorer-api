@@ -10,13 +10,10 @@ const bodyParser = require('body-parser');
 const app = express();
 app.use(cors());
 
-const { createUser, login } = require('./controllers/users');
-const usersRoutes = require('./routes/users');
-const moviesRoutes = require('./routes/movie');
-const auth = require('./middlewares/auth');
-const { validateSign, validateUserRegister } = require('./middlewares/validation');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-const NotFoundError = require('./errors/not-found-error');
+const handlerError = require('./middlewares/handlerError');
+
+const router = require('./routes/index');
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -43,27 +40,12 @@ app.get('/crash-test', () => {
   }, 0);
 });
 
-app.post('/signup', validateUserRegister, createUser);
-app.post('/signin', validateSign, login);
-
-app.use('/', auth, usersRoutes);
-app.use('/', auth, moviesRoutes);
-
-app.use('/', () => {
-  throw new NotFoundError('Запрашиваемый ресурс не найден');
-});
-
+app.use('/', router);
 app.use(errorLogger);
 
 app.use(errors()); // обработчик ошибок celebrate
 
-app.use((err, req, res, next) => {
-  const { status = 500, message } = err;
-  res.status(status).send({
-    message: status === 500 ? 'На сервере произошла ошибка' : message,
-  });
-  next();
-});
+app.use(handlerError);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
