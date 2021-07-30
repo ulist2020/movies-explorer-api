@@ -54,21 +54,16 @@ module.exports.deleteMovie = (req, res, next) => {
     })
     .then((movie) => {
       if (movie.owner._id.toString() === req.user._id) {
-        Movie.findByIdAndRemove(req.params.movieId)
-          // eslint-disable-next-line no-shadow
-          .then((movie) => {
-            res.send(movie);
-          })
-          .catch((err) => {
-            if (err.name === 'CastError') {
-              throw new BadRequestError('Переданы некорректные данные для удаления фильма');
-            }
-          })
-          .catch(next);
-      } else {
-        throw new Forbidden('Вы не можете удалять фильмы других пользователей');
+        return movie;
       }
-      return res.status(200).send({ message: 'Фильм удален' });
+      return next(new Forbidden('Вы не можете удалять фильмы других пользователей'));
     })
-    .catch(next);
+    .then((movie) => movie.remove().then(() => res.send({ message: 'Фильм удален' })))
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError('Переданы некорректные данные для удаления фильма'));
+      } else {
+        next(err);
+      }
+    });
 };
