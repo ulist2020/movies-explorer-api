@@ -43,6 +43,7 @@ module.exports.createMovie = (req, res, next) => {
       if (err.name === 'ValidationError') {
         throw new BadRequestError('Переданы некорректные данные');
       }
+      throw err;
     })
     .catch(next);
 };
@@ -61,9 +62,9 @@ module.exports.deleteMovie = (req, res, next) => {
     .then((movie) => movie.remove().then(() => res.send({ message: 'Фильм удален' })))
     .catch((err) => {
       if (err.name === 'CastError') {
-        next(new BadRequestError('Переданы некорректные данные для удаления фильма'));
-      } else {
-        next(err);
+        throw new BadRequestError('Переданы некорректные данные для удаления фильма');
       }
-    });
+      throw err;
+    })
+    .catch(next);
 };

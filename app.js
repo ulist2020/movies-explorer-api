@@ -11,8 +11,6 @@ const app = express();
 app.use(cors());
 
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-const handlerError = require('./middlewares/handlerError');
-
 const router = require('./routes/index');
 
 app.use((req, res, next) => {
@@ -34,18 +32,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(requestLogger);
 
-app.get('/crash-test', () => {
-  setTimeout(() => {
-    throw new Error('Сервер сейчас упадёт');
-  }, 0);
-});
-
 app.use('/', router);
 app.use(errorLogger);
-
 app.use(errors()); // обработчик ошибок celebrate
-
-app.use(handlerError);
+app.use((err, req, res, next) => {
+  const { status = 500, message } = err;
+  res.status(status).send({
+    message: status === 500 ? 'На сервере произошла ошибка' : message,
+  });
+  next();
+});
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);

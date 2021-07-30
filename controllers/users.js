@@ -20,7 +20,7 @@ module.exports.getCurrentUser = (req, res, next) => {
       if (err.name === 'CastError') {
         throw new BadRequestError('Неправильный id пользователя');
       }
-      next(err);
+      throw err;
     })
     .catch(next);
 };
@@ -38,7 +38,7 @@ module.exports.updateUser = (req, res, next) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
         throw new BadRequestError('Переданы некорректные данные при обновлении профиля');
       }
-      next(err);
+      throw err;
     })
     .catch(next);
 };
@@ -51,6 +51,7 @@ module.exports.createUser = (req, res, next) => {
   } = req.body;
   User.findOne({ email })
     .then((user) => {
+      console.log(user);
       if (user) {
         throw new ConflictError('Пользователь с данным email уже существует');
       }
