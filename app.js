@@ -31,7 +31,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(requestLogger);
-
 app.use('/', router);
 app.use(errorLogger);
 app.use(errors()); // обработчик ошибок celebrate

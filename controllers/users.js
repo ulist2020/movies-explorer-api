@@ -12,17 +12,17 @@ module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь не найден');
+        next(new NotFoundError('Пользователь не найден'));
       }
-      return res.status(200).send({ data: user });
+      return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new BadRequestError('Неправильный id пользователя');
+        next(new BadRequestError('Неправильный id пользователя'));
+      } else {
+        next(err);
       }
-      throw err;
-    })
-    .catch(next);
+    });
 };
 
 module.exports.updateUser = (req, res, next) => {
@@ -30,17 +30,19 @@ module.exports.updateUser = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, { name, email }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь не найден');
+        next(new NotFoundError('Пользователь не найден'));
       }
-      res.status(200).send(user);
+      res.send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
-        throw new BadRequestError('Переданы некорректные данные при обновлении профиля');
+        next(new BadRequestError('Переданы некорректные данные при обновлении профиля'));
+      } if (err.name === 'MongoError' || err.code === 11000) {
+        next(new ConflictError('Пользователь с данным email уже существует'));
+      } else {
+        next(err);
       }
-      throw err;
-    })
-    .catch(next);
+    });
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -51,9 +53,8 @@ module.exports.createUser = (req, res, next) => {
   } = req.body;
   User.findOne({ email })
     .then((user) => {
-      console.log(user);
       if (user) {
-        throw new ConflictError('Пользователь с данным email уже существует');
+        next(new ConflictError('Пользователь с данным email уже существует'));
       }
       return bcrypt.hash(password, 10);
     })
@@ -77,7 +78,7 @@ module.exports.login = (req, res, next) => {
       res.send({ token });
     })
     .catch(() => {
-      throw new UnauthorizedError('Неправильные почта или пароль');
+      next(new UnauthorizedError('Неправильные почта или пароль'));
     })
     .catch(next);
 };
