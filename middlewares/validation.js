@@ -1,7 +1,5 @@
 const { celebrate, Joi } = require('celebrate');
-
-// eslint-disable-next-line no-useless-escape
-const url = /^(https?:\/\/)?(www\.)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/im;
+const validator = require('validator');
 
 const validateUser = celebrate({
   body: Joi.object().keys({
@@ -18,22 +16,22 @@ const validateMovie = celebrate({
     year: Joi.string().required(),
     description: Joi.string().required(),
     image: Joi.string().uri().custom((value, helper) => {
-      if (!value.match(url)) {
-        return helper.message('Invalid value');
+      if (validator.isURL(value)) {
+        return value;
       }
-      return value;
+      return helper.message('Неправилный URL');
     }),
     trailer: Joi.string().uri().custom((value, helper) => {
-      if (!value.match(url)) {
-        return helper.message('Invalid value');
+      if (validator.isURL(value)) {
+        return value;
       }
-      return value;
+      return helper.message('Неправилный URL');
     }),
     thumbnail: Joi.string().uri().custom((value, helper) => {
-      if (!value.match(url)) {
-        return helper.message('Invalid value');
+      if (validator.isURL(value)) {
+        return value;
       }
-      return value;
+      return helper.message('Неправилный URL');
     }),
     movieId: Joi.number().required(),
     nameRU: Joi.string().required(),
